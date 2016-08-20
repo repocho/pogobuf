@@ -8,11 +8,16 @@ const google = new GoogleOAuth();
  * @class GoogleLogin
  * @memberof pogobuf
  */
-function GoogleLogin() {
+function GoogleLogin(locale) {
     if (!(this instanceof GoogleLogin)) {
         return new GoogleLogin();
     }
     const self = this;
+
+    this.locale = {
+        country: locale.country || 'us',
+        lang: locale.lang || 'en'
+    }
 
     /**
      * Based of https://github.com/tejado/pgoapi/blob/master/pgoapi/auth_google.py#L33
@@ -63,7 +68,7 @@ function GoogleLogin() {
      */
     this.getMasterToken = function(username, password) {
         return new Promise((resolve, reject) => {
-            google.login(username, password, GOOGLE_LOGIN_ANDROID_ID, (err, data) => {
+            google.login(username, password, GOOGLE_LOGIN_ANDROID_ID, this.locale.country, this.locale.country, this.locale.lang,  (err, data) => {
                 if (err) {
                     if (err.response.statusCode === 403) {
                         reject(Error(
@@ -93,7 +98,8 @@ function GoogleLogin() {
     this.getToken = function(username, loginData) {
         return new Promise((resolve, reject) => {
             google.oauth(username, loginData.masterToken, loginData.androidId,
-                GOOGLE_LOGIN_SERVICE, GOOGLE_LOGIN_APP, GOOGLE_LOGIN_CLIENT_SIG, (err, data) => {
+                GOOGLE_LOGIN_SERVICE, GOOGLE_LOGIN_APP, GOOGLE_LOGIN_CLIENT_SIG,
+                this.locale.country, this.locale.country, this.locale.lang, (err, data) => {
                     if (err) {
                         reject(Error(err.response.statusCode + ': ' + err.response.statusMessage));
                         return;
